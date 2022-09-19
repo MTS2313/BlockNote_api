@@ -1,12 +1,9 @@
+const mysql = require("mysql");
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "notepad_db",
+});
 
-const config = {
-  user: "sa",
-  password: "1234",
-  server: "localhost",
-  database: "note_DB",
-  options: {
-    trustServerCertificate: true,
-  },
-};
-
-module.exports = config;
+module.exports = pool;

@@ -1,43 +1,28 @@
-const DbRequire = require("./../Interface/DbUserAuth");
-const jwt = require("jsonwebtoken");
-const DBRegister = require("../Interface/DbUserRegister");
+const pool = require("../connect");
+const { verify, auth } = require("../middleware/jwt_vality");
+
 
 
 class UserControl {
-  constructor(BodyUser, BodyPassword) {
-    this.user = BodyUser;
-    this.password = BodyPassword;
+  constructor(req) {
+    this.LoginUser;
   }
-  
-  //  criar token de acesso
-  async login(user, password) {
-    const DBResp = await DbRequire(user, password);
-    // IdUser e usado como chave publica
-    const IdUser = DBResp.recordset[0].id;
-    if (!(DBResp.rowsAffected[0] === 0)) {
-      const token = jwt.sign({ IdUser }, process.env.SECRET, {
-        expiresIn: "7d",
-      });
-      return { token: token };
-    } else {
-      return { Error: "Usuario não encontrado!!!" };
-    }
-}
-
-
-// verificar token
-  verify(token) {
-    var result;
-    jwt.verify(token, process.env.SECRET, (err, decoded) => {
-      result = err ? { auth: "unsucess" } : { "auth:": "sucess" };
-    });
-    return result;
+   LoginUser(req, res) {
+    var SQLquery = `select * from users_table where user_name='${req.body.name}' and user_password='${req.body.password}'`;
+    pool.query(SQLquery).on('result',result=>{
+      const token = auth(result.user_id) 
+      res.send({'token':token});
+    })
+  }
+  RegisterUser(req,res){
+    var SQLquery = `insert into users_table (user_name,user_password) values ('${req.body.name}','${req.body.password}')`
+    pool.query(SQLquery).on('result',result=>{
+      if(result.affectedRows !== 0){
+        res.json({"message":"User Registere with sucess"})
+      }
+    }).on('error',err=>res.json({"erro":"User not registred,plase insert other name"}))
   }
 
-  async register(user,password){
-    const RegisterResp = await DBRegister(user,password)
-  return RegisterResp.length === 1 ? {"status":"registrado"} : {"status" : "nao registrado"}
-}
 }
 
 module.exports = UserControl;

@@ -1,10 +1,6 @@
 const express = require("express");
-const sql = require("mssql");
-const config = require("./connect");
 const app = express();
-const DB = require("./connect");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+require('dotenv').config({path:'/media/mateus/AllOsStorege_Mad/Dev/BlockNote_api/src/.env'});
 const routers = require("./routes");
 
 app.use(express.json());
